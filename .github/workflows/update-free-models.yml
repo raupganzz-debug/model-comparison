@@ -1,0 +1,35 @@
+name: Update free models
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.TARGET_REPO }}
+          ref: ${{ vars.TARGET_BRANCH || 'main' }}
+          token: ${{ secrets.TARGET_REPO_TOKEN }}
+          path: target
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: node scripts/update-free-models.mjs
+        env:
+          ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
+          OUT_DIR: target
+      - working-directory: target
+        run: |
+          git config user.name "${{ vars.GIT_NAME || 'github-actions[bot]' }}"
+          git config user.email "${{ vars.GIT_EMAIL || 'contacts@saturia.codes' }}"
+          git add free-models.json FREE_MODELS.md
+          git diff --staged --quiet || (git commit -m "chore: update free models" && git push)
