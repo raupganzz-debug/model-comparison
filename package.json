@@ -1,0 +1,8 @@
+{
+  "name": "opencode-free-models",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": { "update": "node scripts/update-free-models.mjs" },
+  "dependencies": { "cheerio": "^1.0.0" }
+}
